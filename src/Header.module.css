@@ -1,0 +1,60 @@
+.Head {
+	padding: 5px 10px;
+	background-color: #4a8bd4;
+	height: 105px;
+	overflow: hidden;
+}
+.HeadTop {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 5px;
+}
+.HeadTitle {
+	font-size: 16px;
+	font-weight: bold;
+	color: #fff;
+	flex: 1;
+	display: flex;
+	align-items: center;
+}
+.HeadTitleDropDown {
+	display: flex;
+	align-items: center;
+}
+.HeadTitle Select {
+	background-color: transparent;
+	color: #fff;
+	outline: none;
+	border: none;
+	margin-left: 10px;
+	padding: 10px;
+	width: 100px;
+	padding-right: 20px;
+	text-overflow: ellipsis;
+}
+.HeadSearch input {
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+	margin: 0;
+	font-variant: tabular-nums;
+	list-style: none;
+	-webkit-font-feature-settings: 'tnum';
+	font-feature-settings: 'tnum';
+	position: relative;
+	display: inline-block;
+	width: 100%;
+	min-width: 0;
+	padding: 4px 11px;
+	color: rgba(0, 0, 0, 0.85);
+	font-size: 14px;
+	line-height: 1.5715;
+	background-color: #fff;
+	background-image: none;
+	border: 1px solid #d9d9d9;
+	border-radius: 2px;
+	-webkit-transition: all 0.3s;
+	transition: all 0.3s;
+	outline: none;
+	border-radius: 3px;
+}

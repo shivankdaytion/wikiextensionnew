@@ -1,0 +1,59 @@
+{
+	"manifest_version": 2,
+	"name": "WikiApp",
+	"short_name": "WikiApp",
+	"description": "Knowledge for all",
+	"version": "1.1",
+	"permissions": [
+		"activeTab",
+		"tabs",
+		"contextMenus",
+		"storage",
+		"http://*/*",
+		"https://*/*",
+		"https://api.wiki.app/"
+	],
+	"browser_action": {
+		"default_title": "Knowledge of all"
+	},
+	"icons": {
+		"16": "./assets/img/logo-16.png",
+		"32": "./assets/img/logo-32.png",
+		"48": "./assets/img/logo-48.png",
+		"128": "./assets/img/logo-128.png"
+	},
+	"background": {
+		"scripts": [
+			"./background/operation.js",
+			"./background/axios.min.js",
+			"./background/model/api.js",
+			"./background/background.js"
+		],
+		"persistent": false
+	},
+	"content_scripts": [
+		{
+			"matches": ["http://*/*", "https://*/*"],
+			"js": ["./context_script/script.js"],
+			"run_at": "document_end"
+		},
+		{
+			"matches": ["https://wiki.app/*", "http://web.wiki.app/*"],
+			"js": ["./context_script/token.js"],
+			"run_at": "document_end"
+		}
+	],
+	"web_accessible_resources": ["static/js/main.js", "static/css/main.css", "context_script/script.js"],
+	"commands": {
+		"_execute_browser_action": {
+			"suggested_key": {
+				"default": "Ctrl+Shift+U",
+				"windows": "Ctrl+Shift+U",
+				"mac": "Command+Shift+U",
+				"chromeos": "Ctrl+Shift+U",
+				"linux": "Ctrl+Shift+U"
+			}
+		}
+	},
+	"content_security_policy": "script-src 'self' 'unsafe-eval'; style-src 'self'; img-src *; font-src 'self'; connect-src * blob:; media-src 'self'; object-src 'self'; prefetch-src 'self'; frame-src 'self'; worker-src 'self'; frame-ancestors 'self'; form-action 'self'; base-uri 'self'"
+}

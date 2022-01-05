@@ -1,0 +1,6 @@
+#wikiapp-root::before,
+#wikiapp-root::after,
+#wikiapp-root *::before,
+#wikiapp-root *::after {
+	all: unset;
+}
