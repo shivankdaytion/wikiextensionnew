@@ -51,7 +51,7 @@ export default function Header() {
 				<div className={Styles.HeadTitle}>
 					<span>Mission Internet</span>
 					<div className={Styles.HeadTitleDropDown}>
-						<select onChange={(e) => currentProject(e.currentTarget.value)}>
+						<select value={base?.id || 0} onChange={(e) => currentProject(e.currentTarget.value)}>
 							{bases.map((o, i) => {
 								return (
 									<option key={o.id} value={o.id}>

@@ -10,3 +10,8 @@ export const getBases = async () => {
 	var event = new CustomEvent('passToBackground', { detail: message })
 	window.dispatchEvent(event)
 }
+export const getMetaData = async () => {
+	var message = { CMD: 'META_DATA' }
+	var event = new CustomEvent('passToBackground', { detail: message })
+	window.dispatchEvent(event)
+}

@@ -2,96 +2,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios, { DOMAIN } from './config'
 
-export const createFolder = createAsyncThunk('wiki/createFolder', async ({ channelId, postdata }, thunkAPI) => {
-	try {
-		const URL = `${DOMAIN}/v1/channel/${channelId}/wiki/folder`
-		const response = await axios.post(URL, postdata)
-		if (response.status === 201) {
-			return response.data
-		} else {
-			return thunkAPI.rejectWithValue(response.data)
-		}
-	} catch (e) {
-		console.log('Error', e)
-		return thunkAPI.rejectWithValue(e.response.data)
-	}
-})
-
-export const updateFolder = createAsyncThunk('wiki/updateFolder', async ({ channelId, elementId, postdata }, thunkAPI) => {
-	try {
-		const URL = `${DOMAIN}/v1/channel/${channelId}/wiki/element/${elementId}`
-		const response = await axios.put(URL, postdata)
-		if (response.status === 200) {
-			return response.data
-		} else {
-			return thunkAPI.rejectWithValue(response.data)
-		}
-	} catch (e) {
-		console.log('Error', e)
-		return thunkAPI.rejectWithValue(e.response.data)
-	}
-})
-
-export const updateFolderNote = createAsyncThunk('wiki/updateFolderNote', async ({ channelId, folderId, postdata }, thunkAPI) => {
-	try {
-		const URL = `${DOMAIN}/v1/channel/${channelId}/wiki/folder/${folderId}/note`
-		const response = await axios.put(URL, postdata)
-		if (response.status === 200) {
-			return response.data
-		} else {
-			return thunkAPI.rejectWithValue(response.data)
-		}
-	} catch (e) {
-		console.log('Error', e.response.data)
-		return thunkAPI.rejectWithValue(e.response.data)
-	}
-})
-
-export const createNote = createAsyncThunk('wiki/createNote', async ({ channelId, postdata }, thunkAPI) => {
-	try {
-		const URL = `${DOMAIN}/v1/channel/${channelId}/wiki/note`
-		const response = await axios.post(URL, postdata)
-		if (response.status === 201) {
-			return response.data
-		} else {
-			return thunkAPI.rejectWithValue(response.data)
-		}
-	} catch (e) {
-		console.log('Error', e)
-		return thunkAPI.rejectWithValue(e.response.data)
-	}
-})
-
-export const updateNote = createAsyncThunk('wiki/updateNote', async ({ channelId, noteId, postdata }, thunkAPI) => {
-	try {
-		const URL = `${DOMAIN}/v1/channel/${channelId}/wiki/note/${noteId}`
-		const response = await axios.put(URL, postdata)
-		if (response.status === 200) {
-			return response.data
-		} else {
-			return thunkAPI.rejectWithValue(response.data)
-		}
-	} catch (e) {
-		//console.log('Error', e)
-		return thunkAPI.rejectWithValue(e.response.data)
-	}
-})
-
-export const updateNoteDraft = createAsyncThunk('wiki/updateNoteDraft', async ({ channelId, noteId, postdata }, thunkAPI) => {
-	try {
-		const URL = `${DOMAIN}/v1/channel/${channelId}/wiki/draft/note/${noteId}`
-		const response = await axios.put(URL, postdata)
-		if (response.status === 200) {
-			return response.data
-		} else {
-			return thunkAPI.rejectWithValue(response.data)
-		}
-	} catch (e) {
-		console.log('Error', e)
-		return thunkAPI.rejectWithValue(e.response.data)
-	}
-})
-
 export const getElements = createAsyncThunk('wiki/getElements', async ({ channelId, parentId = 0, status = 'all', page = 1 }, thunkAPI) => {
 	try {
 		const URL = `${DOMAIN}/v1/channel/${channelId}/wiki/parent/${parentId}?status=${status}&page=${page}`
@@ -741,11 +651,11 @@ const paginationObj = {
 	refreshing: false
 }
 export const wikiSlice = createSlice({
-	name: 'ticket',
+	name: 'wiki',
 	initialState: {
-		wikielements: {},
+		wikielements: [],
 		wikielement: {},
-		wikielementspagination: {},
+		wikielementspagination: paginationObj,
 		wikibreadcrumb: []
 	},
 	reducers: {
@@ -759,21 +669,19 @@ export const wikiSlice = createSlice({
 	extraReducers: {
 		[getElements.pending]: (state, { payload, meta }) => {
 			const { arg } = meta
-			if (!state.wikielementspagination[arg.channelId]) state.wikielementspagination[arg.channelId] = paginationObj
-			state.wikielementspagination[arg.channelId] = { ...state.wikielementspagination[arg.channelId], loading: true }
-			state.wikielements[arg.channelId] = arg.page === 1 ? [] : state.wikielements[arg.channelId]
+			state.wikielementspagination = { ...state.wikielementspagination[arg.channelId], loading: true }
+			state.wikielements = arg.page === 1 ? [] : state.wikielements
 			return state
 		},
 		[getElements.fulfilled]: (state, { payload, meta }) => {
 			const { arg } = meta
-			state.wikielementspagination[arg.channelId] = {
-				...state.wikielementspagination[arg.channelId],
+			state.wikielementspagination = {
+				...state.wikielementspagination,
 				page: arg.page + 1,
 				loading: false,
-				hasmore: arg.page === 1 ? true : state.wikielementspagination[arg.ticketFilter].hasmore
+				hasmore: arg.page === 1 ? true : state.wikielementspagination.hasmore
 			}
-			state.wikielements[arg.channelId] =
-				arg.page === 1 ? payload.data.data : [...payload.data.data, ...state.wikielements[arg.channelId]]
+			state.wikielements = arg.page === 1 ? payload.data.data : [...payload.data.data, ...state.wikielements]
 			return state
 		},
 		[getWikiElement.fulfilled]: (state, { payload, meta }) => {
@@ -786,113 +694,15 @@ export const wikiSlice = createSlice({
 		[enableNoteEditing.fulfilled]: (state, { payload, meta }) => {
 			state.wikielement = payload.data.element
 		},
-		[createFolder.fulfilled]: (state, { payload, meta }) => {
-			const { arg } = meta
-			state.wikielement = payload.data.element
-			state.wikielements[arg.channelId] = [payload.data.element, ...state.wikielements[arg.channelId]]
-		},
-		[createNote.fulfilled]: (state, { payload, meta }) => {
-			const { arg } = meta
-			state.wikielement = payload.data.element
-			state.wikielements[arg.channelId] = [payload.data.element, ...state.wikielements[arg.channelId]]
-		},
 		[wikiNoteSwitchDraft.fulfilled]: (state, { payload, meta }) => {
 			state.wikielement = payload.data.element
 		},
-		[updateNoteDraft.fulfilled]: (state, { payload, meta }) => {
-			state.wikielement = payload.data.element
-		},
-		[updateNote.fulfilled]: (state, { payload, meta }) => {
-			state.wikielement = payload.data.element
-		},
-		[elementDraftList.pending]: (state, { payload, meta }) => {
-			const { arg } = meta
-			if (!state.wikielementspagination[arg.channelId]) state.wikielementspagination[arg.channelId] = paginationObj
-			state.wikielementspagination[arg.channelId] = { ...state.wikielementspagination[arg.channelId], loading: true }
-		},
-		[elementDraftList.fulfilled]: (state, { payload, meta }) => {
-			const { arg } = meta
-			state.wikielementspagination[arg.channelId] = {
-				...state.wikielementspagination[arg.channelId],
-				page: arg.page + 1,
-				loading: false,
-				hasmore: arg.page === 1 ? true : state.wikielementspagination[arg.ticketFilter].hasmore
-			}
-			state.wikielements[arg.channelId] =
-				arg.page === 1 ? payload.data.data : [...payload.data.data, ...state.wikielements[arg.channelId]]
-			return state
-		},
-		[elementTrashList.fulfilled]: (state, { payload, meta }) => {
-			const { arg } = meta
-			state.wikielementspagination[arg.channelId] = {
-				...state.wikielementspagination[arg.channelId],
-				page: arg.page + 1,
-				loading: false,
-				hasmore: arg.page === 1 ? true : state.wikielementspagination[arg.ticketFilter].hasmore
-			}
-			state.wikielements[arg.channelId] =
-				arg.page === 1 ? payload.data.data : [...payload.data.data, ...state.wikielements[arg.channelId]]
-			return state
-		},
-		[elementStarredList.fulfilled]: (state, { payload, meta }) => {
-			const { arg } = meta
-			state.wikielementspagination[arg.channelId] = {
-				...state.wikielementspagination[arg.channelId],
-				page: arg.page + 1,
-				loading: false,
-				hasmore: arg.page === 1 ? true : state.wikielementspagination[arg.ticketFilter].hasmore
-			}
-			state.wikielements[arg.channelId] =
-				arg.page === 1 ? payload.data.data : [...payload.data.data, ...state.wikielements[arg.channelId]]
-			return state
-		},
-		[elementArchivedList.fulfilled]: (state, { payload, meta }) => {
-			const { arg } = meta
-			state.wikielementspagination[arg.channelId] = {
-				...state.wikielementspagination[arg.channelId],
-				page: arg.page + 1,
-				loading: false,
-				hasmore: arg.page === 1 ? true : state.wikielementspagination[arg.ticketFilter].hasmore
-			}
-			state.wikielements[arg.channelId] =
-				arg.page === 1 ? payload.data.data : [...payload.data.data, ...state.wikielements[arg.channelId]]
-			return state
-		},
+
 		[saveCollaborator.fulfilled]: (state, { payload, meta }) => {
 			state.wikielement = payload.data.element
 		},
 		[wikiPublishNote.fulfilled]: (state, { payload, meta }) => {
 			state.wikielement = payload.data.element
-		},
-		[elementArchive.fulfilled]: (state, { payload, meta }) => {
-			const { arg } = meta
-			state.wikielement = payload.data.element
-			state.wikielements[arg.channelId] = (state.wikielements[arg.channelId] || []).filter((o) => o.id !== arg.elementId)
-		},
-		[elementUnarchive.fulfilled]: (state, { payload, meta }) => {
-			const { arg } = meta
-			state.wikielement = payload.data.element
-			state.wikielements[arg.channelId] = (state.wikielements[arg.channelId] || []).filter((o) => o.id !== arg.elementId)
-		},
-		[elementTrash.fulfilled]: (state, { payload, meta }) => {
-			const { arg } = meta
-			state.wikielement = payload.data.element
-			state.wikielements[arg.channelId] = (state.wikielements[arg.channelId] || []).filter((o) => o.id !== arg.elementId)
-		},
-		[elementRestore.fulfilled]: (state, { payload, meta }) => {
-			const { arg } = meta
-			state.wikielement = payload.data.element
-			state.wikielements[arg.channelId] = (state.wikielements[arg.channelId] || []).filter((o) => o.id !== arg.elementId)
-		},
-		[elementAddStar.fulfilled]: (state, { payload, meta }) => {
-			const { arg } = meta
-			state.wikielement = payload.data.element
-			state.wikielements[arg.channelId] = (state.wikielements[arg.channelId] || []).map((o) => (o.id === arg.elementId ? payload.data.element : o))
-		},
-		[elementDeleteStar.fulfilled]: (state, { payload, meta }) => {
-			const { arg } = meta
-			state.wikielement = payload.data.element
-			state.wikielements[arg.channelId] = (state.wikielements[arg.channelId] || []).map((o) => (o.id === arg.elementId ? payload.data.element : o))
 		}
 	}
 })

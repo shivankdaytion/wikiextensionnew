@@ -8,7 +8,7 @@ import { useDispatch } from 'react-redux'
 
 //import { useTrackedState, useDispatch } from './context/Store'
 
-import { copylink, copyRichText } from './utils/Helper'
+import { copylink, copyRichText } from './utils/helper'
 
 export default function Detail() {
 	//const state = useTrackedState()

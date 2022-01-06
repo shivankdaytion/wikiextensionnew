@@ -1,66 +1,90 @@
-import React from 'react'
-// import Styles from './Recent.module.css'
+import { userSelector } from 'features/UserSlice'
+import { useEffect, useMemo, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import styled from 'styled-components'
+import { baseSelector, getBaseHomeElement, getBaseStarredElement, listBase } from '../../features/BaseSlice'
+import { Camera } from 'react-feather'
+import { FileText } from '../../../node_modules/react-feather/dist/index'
+import { channelSelector } from 'features/ChannelSlice'
+import { timeAgo } from 'utils/helper'
+import { StyledAvatar, StyledCol, StyledRow, StyledSubTitle, StyledTitle } from 'StyledComponent'
 
-import InfiniteScroll from 'react-infinite-scroll-component'
-
-
-//import { inboxnotes, showNote } from '../model/Api'
-
-import Detail from '../../Detail'
-
-import Loading from '../../component/Loading'
-import Nodata from '../../component/Nodata'
-
-const Styles = {}
-
-export default function Starred() {
-	// const state = useTrackedState()
-	// const dispatch = useDispatch()
-
-	const { notedetail, token, user, recent, recentloading, recentpaging } = {}
-
-	const _inboxnotes = async (paging) => {
-		// if (user.current_project && recentloading === false) {
-		// 	dispatch({ type: 'RECENTLOADING', payload: true })
-		// 	if (paging === 1) {
-		// 		dispatch({ type: 'RECENT', payload: [] })
-		// 	}
-		// 	inboxnotes(user.current_project, paging)
-		// }
+const StyledListContainer = styled.div`
+	overflow-y: auto;
+	height: 100%;
+	.row:hover {
+		background-color: rgb(243, 248, 253) !important;
 	}
-	const _getNoteDetail = async (noteId) => {
-		//showNote(noteId)
+`
+
+const RenderContent = ({ item, members }) => {
+	if (item.mode === 'folder') {
+		return (
+			<>
+				<StyledSubTitle>&nbsp;&nbsp;&bull;&nbsp;&nbsp;</StyledSubTitle>
+				{item.folders === 0 && item.notes === 0 ? (
+					<StyledSubTitle>{`Empty Folder`}</StyledSubTitle>
+				) : (
+					<>
+						<StyledSubTitle>{item.folders} Folders</StyledSubTitle>
+						<StyledSubTitle>&nbsp;&nbsp;&bull;&nbsp;&nbsp;</StyledSubTitle>
+						<StyledSubTitle>{item.notes} Notes</StyledSubTitle>
+					</>
+				)}
+			</>
+		)
 	}
-	React.useEffect(() => {
-		_inboxnotes(1)
-	}, [user])
-	const isFloat = (n) => {
-		return n === 0 ? false : Number(n) === n && n % 1 !== 0
-	}
-	if (notedetail?.id) {
-		return <Detail />
+	if (item.status_change_by) {
+		const mem = members.find((o) => o.id === item.status_change_by) || {}
+		return (
+			<>
+				<StyledSubTitle>&nbsp;&nbsp;&bull;&nbsp;&nbsp;</StyledSubTitle>
+				<StyledSubTitle>
+					Update by {mem.name} {timeAgo(item.updated_at)}
+				</StyledSubTitle>
+			</>
+		)
 	}
 	return (
-		<div className={Styles.Recent} id='recent'>
-			{recentloading && recent.length === 0 ? <Loading /> : null}
-			{recentloading === false && recent.length === 0 ? <Nodata /> : null}
-			<InfiniteScroll
-				dataLength={recent.length} //This is important field to render the next data
-				next={() => _inboxnotes(recentpaging)}
-				hasMore={!isFloat(recent.length / 30)}
-				loader={null}
-				endMessage={null}
-				scrollableTarget={'recent'}>
-				<ul>
-					{recent.map((o, i) => {
-						return (
-							<li key={`list${i}`} onClick={() => _getNoteDetail(o.id)}>
-								{o.title}
-							</li>
-						)
-					})}
-				</ul>
-			</InfiniteScroll>
-		</div>
+		<>
+			<StyledSubTitle>&nbsp;&nbsp;&bull;&nbsp;&nbsp;</StyledSubTitle>
+			<StyledSubTitle>Updated {timeAgo(item.updated_at)}</StyledSubTitle>
+		</>
 	)
 }
+
+const Starred = ({ active }) => {
+	const { basestarred, base, basemembers } = useSelector(baseSelector)
+	const { channels } = useSelector(channelSelector)
+	const dispatch = useDispatch()
+	const list = useMemo(() => basestarred[base?.id] || [], [base?.id, basestarred])
+	const channellist = useMemo(() => channels[base?.id] || [], [base?.id, channels])
+	const members = useMemo(() => basemembers[base?.id] || [], [base?.id, basemembers])
+	// console.log(channellist, list)
+	useEffect(() => {
+		if (base?.id) dispatch(getBaseStarredElement({ baseId: base?.id, page: 1 }))
+	}, [base?.id, dispatch])
+
+	return (
+		<StyledListContainer>
+			{list.map((o) => {
+				const chn = channellist.find((item) => item.id === o.channel_id) || {}
+				return (
+					<StyledRow key={o.id} className='row' style={{ padding: 6, cursor: 'pointer' }}>
+						<StyledAvatar style={{ marginTop: 3 }}>
+							<FileText />
+						</StyledAvatar>
+						<StyledCol>
+							<StyledTitle>{o.title}</StyledTitle>
+							<StyledRow>
+								<StyledSubTitle>#{chn.name}</StyledSubTitle>
+								<RenderContent item={o} members={members} />
+							</StyledRow>
+						</StyledCol>
+					</StyledRow>
+				)
+			})}
+		</StyledListContainer>
+	)
+}
+export default Starred

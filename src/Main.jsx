@@ -4,17 +4,18 @@ import Styles from './HomeTab.module.css'
 
 import Starred from './pages/home/Starred'
 import Ask from './pages/home/Ask'
-import Browse from './pages/home/Browse'
+import Wiki from './pages/home/Wiki'
 import Home from './pages/home/Home'
 import { globalStateSelector, setPage } from 'features/GlobalStateSlice'
+import { setWikiElement } from 'features/WikiSlice'
 
 
 
 const MainComponent = ({ page }) => {
 	if (page === 'Home') {
 		return <Home />
-	} else if (page === 'Channel') {
-		return <Browse />
+	} else if (page === 'Wiki') {
+		return <Wiki />
 	} else if (page === 'Ask') {
 		return <Ask />
 	} else if (page === 'Starred') {
@@ -29,21 +30,26 @@ function Main() {
 	const { page } = useSelector(globalStateSelector)
 	//const [active, setActive] = useState('Home')
 
+	const switchTab = (page) => {
+		dispatch(setPage({ data: page }))
+		dispatch(setWikiElement({ data: {} }))
+	}
+
 	return (
 		<div className={Styles.Tab}>
 			<div className={Styles.Tabbar}>
 				<ul>
-					<li onClick={() => dispatch(setPage({ data: 'Home' }))} className={`${page === 'Home' ? Styles.active : null}`}>
+					<li onClick={() => switchTab('Home')} className={`${page === 'Home' ? Styles.active : null}`}>
 						Home
 					</li>
-					<li onClick={() => dispatch(setPage({ data: 'Channel' }))} className={`${page === 'Channel' ? Styles.active : null}`}>
-						Channel
+					<li onClick={() => switchTab('Wiki')} className={`${page === 'Wiki' ? Styles.active : null}`}>
+						Wiki
 					</li>
-					<li onClick={() => dispatch(setPage({ data: 'Ask' }))} className={`${page === 'Ask' ? Styles.active : null}`}>
-						Ask
-					</li>
-					<li onClick={() => dispatch(setPage({ data: 'Starred' }))} className={`${page === 'Starred' ? Styles.active : null}`}>
+					<li onClick={() => switchTab('Starred')} className={`${page === 'Starred' ? Styles.active : null}`}>
 						Starred
+					</li>
+					<li onClick={() => switchTab('Ask')} className={`${page === 'Ask' ? Styles.active : null}`}>
+						Ask
 					</li>
 				</ul>
 			</div>

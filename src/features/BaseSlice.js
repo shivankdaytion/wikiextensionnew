@@ -153,6 +153,9 @@ export const baseSlice = createSlice({
 		},
 		setBase: (state, { payload }) => {
 			state.base = payload.data
+		},
+		setBaseMembers: (state, { payload }) => {
+			state.basemembers = payload.data
 		}
 	},
 	extraReducers: {
@@ -177,8 +180,7 @@ export const baseSlice = createSlice({
 		},
 		[getBaseHomeElement.fulfilled]: (state, { payload, meta }) => {
 			const { arg } = meta
-			state.basehome[arg.baseId] =
-				arg.page === 1 ? payload.data.data : [...state.basehome[arg.baseId], ...payload.data.data]
+			state.basehome[arg.baseId] = arg.page === 1 ? payload.data.data : [...state.basehome[arg.baseId], ...payload.data.data]
 			state.basehomepagination = {
 				...state.basehomepagination,
 				page: arg.page + 1,
@@ -198,8 +200,7 @@ export const baseSlice = createSlice({
 		},
 		[getBaseStarredElement.fulfilled]: (state, { payload, meta }) => {
 			const { arg } = meta
-			state.basestarred[arg.baseId] =
-				arg.page === 1 ? payload.data.data : [...state.basestarred[arg.baseId], ...payload.data.data]
+			state.basestarred[arg.baseId] = arg.page === 1 ? payload.data.data : [...state.basestarred[arg.baseId], ...payload.data.data]
 			state.basestarredpagination = {
 				...state.basestarredpagination,
 				page: arg.page + 1,
@@ -219,8 +220,7 @@ export const baseSlice = createSlice({
 		},
 		[getBaseDraftsElement.fulfilled]: (state, { payload, meta }) => {
 			const { arg } = meta
-			state.basedrafts[arg.baseId] =
-				arg.page === 1 ? payload.data.data : [...state.basedrafts[arg.baseId], ...payload.data.data]
+			state.basedrafts[arg.baseId] = arg.page === 1 ? payload.data.data : [...state.basedrafts[arg.baseId], ...payload.data.data]
 			state.basedraftspagination = {
 				...state.basedraftspagination,
 				page: arg.page + 1,
@@ -249,14 +249,13 @@ export const baseSlice = createSlice({
 				total: payload.data.total
 			}
 
-			state.baseactivity[arg.baseId] =
-				arg.page === 1 ? payload.data.data : [...state.baseactivity[arg.baseId], ...payload.data.data]
+			state.baseactivity[arg.baseId] = arg.page === 1 ? payload.data.data : [...state.baseactivity[arg.baseId], ...payload.data.data]
 
 			return state
 		}
 	}
 })
 
-export const { setPage, setHasMore, setLoadMore, setBase, setBases } = baseSlice.actions
+export const { setPage, setHasMore, setLoadMore, setBase, setBases, setBaseMembers } = baseSlice.actions
 
 export const baseSelector = (state) => state.base

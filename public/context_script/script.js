@@ -76,6 +76,7 @@ function init() {
 	}, 300)
 }
 function createHtml() {
+	//if(process.env.NODE_ENV === 'development') return
 	document.querySelectorAll('*[id*=wikiapp-]').forEach((e, i) => {
 		e.remove()
 	})
@@ -127,7 +128,8 @@ const passToReact = (cmd, payload) => {
 	var event = new CustomEvent('passToReact', { detail: message })
 	window.dispatchEvent(event)
 }
-//createHtml()
+
+createHtml()
 const onMessage = (request, sender, response) => {
 	if (!sender) {
 		return
@@ -137,16 +139,14 @@ const onMessage = (request, sender, response) => {
 }
 
 const passToBackground = (evt) => {
-	console.log('chrome', evt.detail)
 	if (!evt) {
 		return
 	}
-	console.log('chrome', evt.detail)
 	if (!chrome) {
 		return
 	}
 	chrome.runtime.sendMessage(evt.detail, function (response) {
-		passToReact(response.CMD, response.data)
+		passToReact(response.CMD, response.payload)
 	})
 }
 const initListener = async () => {

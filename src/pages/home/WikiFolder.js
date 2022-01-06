@@ -8,9 +8,10 @@ import { FileText } from '../../../node_modules/react-feather/dist/index'
 import { channelSelector } from 'features/ChannelSlice'
 import { timeAgo } from 'utils/helper'
 import { StyledAvatar, StyledCol, StyledRow, StyledSubTitle, StyledTitle } from 'StyledComponent'
-import { wikiSelector, setWikiElement } from 'features/WikiSlice'
+import { wikiSelector, setWikiElement, getElements, elementBreadCrumb } from 'features/WikiSlice'
 import WikiElement from './WikiElement'
-import WikiFolder from './WikiFolder'
+import WikiBreadCrumb from './WikiBreadCrumb'
+
 
 const StyledListContainer = styled.div`
 	overflow-y: auto;
@@ -56,50 +57,47 @@ const RenderContent = ({ item, members }) => {
 	)
 }
 
-const Home = ({ active }) => {
+const WikiFolder = ({ active }) => {
 	const { basehome, base, basemembers } = useSelector(baseSelector)
 	const { channels } = useSelector(channelSelector)
-	const { wikielement } = useSelector(wikiSelector)
+	const { wikielements, wikielement, wikibreadcrumb } = useSelector(wikiSelector)
 
 	const dispatch = useDispatch()
-	const list = useMemo(() => basehome[base?.id] || [], [base?.id, basehome])
+
 	const channellist = useMemo(() => channels[base?.id] || [], [base?.id, channels])
 	const members = useMemo(() => basemembers[base?.id] || [], [base?.id, basemembers])
 	// console.log(channellist, list)
 	useEffect(() => {
-		if (base?.id) dispatch(getBaseHomeElement({ baseId: base?.id, page: 1 }))
-	}, [base?.id, dispatch])
+		if (wikielement?.id){
+            dispatch(getElements({ channelId: wikielement.channel_id, parentId: wikielement.id, status: 'all', page: 1 })) 
+            dispatch(elementBreadCrumb({ channelId: wikielement.channel_id, elementId: wikielement.id }))
+        }  
+	}, [dispatch, wikielement?.id])
 
 	if (wikielement?.id) {
-		
-		if (wikielement.mode === 'folder') {
-			console.log(wikielement)
-			return <WikiFolder />
-		} else {
-			return <WikiElement wikielement={wikielement} />
-		}
+		return (
+			<StyledListContainer>
+				<WikiBreadCrumb />
+				{wikielements.map((o) => {
+					const chn = channellist.find((item) => item.id === o.channel_id) || {}
+					return (
+						<StyledRow key={o.id} className='row' style={{ padding: 6, cursor: 'pointer' }} onClick={() => dispatch(setWikiElement({ data: o }))}>
+							<StyledAvatar style={{ marginTop: 3 }}>
+								<FileText />
+							</StyledAvatar>
+							<StyledCol>
+								<StyledTitle>{o.title}</StyledTitle>
+								<StyledRow>
+									<StyledSubTitle>#{chn.name}</StyledSubTitle>
+									<RenderContent item={o} members={members} />
+								</StyledRow>
+							</StyledCol>
+						</StyledRow>
+					)
+				})}
+			</StyledListContainer>
+		)
 	}
-
-	return (
-		<StyledListContainer>
-			{list.map((o) => {
-				const chn = channellist.find((item) => item.id === o.channel_id) || {}
-				return (
-					<StyledRow key={o.id} className='row' style={{ padding: 6, cursor: 'pointer' }} onClick={() => dispatch(setWikiElement({ data: o }))}>
-						<StyledAvatar style={{ marginTop: 3 }}>
-							<FileText />
-						</StyledAvatar>
-						<StyledCol>
-							<StyledTitle>{o.title}</StyledTitle>
-							<StyledRow>
-								<StyledSubTitle>#{chn.name}</StyledSubTitle>
-								<RenderContent item={o} members={members} />
-							</StyledRow>
-						</StyledCol>
-					</StyledRow>
-				)
-			})}
-		</StyledListContainer>
-	)
+	return null
 }
-export default Home
+export default WikiFolder

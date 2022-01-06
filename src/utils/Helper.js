@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 import toast from 'react-hot-toast'
-// import { useTrackedState } from '../context/Store'
+import dayjs from './dayjs'
 
 export const copylink = (note) => {
 	const name = note.title.replace(/[\W_]+/g, '-').toLowerCase()
@@ -59,4 +59,41 @@ export const checkExtensionInstalled = async (extensionid) => {
 	//     //     e.remove();
 	//     // });
 	// }
+}
+export const timeAgo = (time, format = '') => {
+	const user = JSON.parse(localStorage.getItem('@user')) || {}
+	if (format) {
+		return dayjs(time).tz(user.timezone).format(format)
+	}
+	const date = dayjs(time).tz(user.timezone)
+	return timeSince(date)
+}
+function timeSince(date) {
+	var seconds = Math.floor((new Date() - date) / 1000)
+
+	var interval = seconds / 31536000
+
+	if (interval > 1) {
+		return Math.floor(interval) + ' yr ago'
+	}
+	interval = seconds / 2592000
+	if (interval > 1) {
+		return Math.floor(interval) + ' mn ago'
+	}
+	interval = seconds / 86400
+	if (interval > 1) {
+		return Math.floor(interval) + ' d ago'
+	}
+	interval = seconds / 3600
+	if (interval > 1) {
+		return Math.floor(interval) + ' hr ago'
+	}
+	interval = seconds / 60
+	if (interval > 1) {
+		return Math.floor(interval) + ' min ago'
+	}
+	if (seconds < 10) {
+		return 'Just now'
+	}
+	return Math.floor(seconds) + ' secs ago'
 }

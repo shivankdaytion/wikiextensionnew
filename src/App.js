@@ -8,13 +8,15 @@ import Search from './Search'
 import Detail from './Detail'
 import { Provider, useDispatch, useSelector } from 'react-redux'
 
-import { checkExtensionInstalled } from './utils/Helper'
+import { checkExtensionInstalled } from './utils/helper'
 import store from './features/store'
 import Styles from './App.module.css'
-import { baseSelector, listBase } from './features/BaseSlice'
-import { userSelector } from './features/UserSlice'
+import { baseSelector, setBase, setBaseMembers, setBases } from './features/BaseSlice'
+import { userSelector, setUser } from './features/UserSlice'
 import { globalStateSelector } from './features/GlobalStateSlice'
-import { getBases, getUser } from 'features/events'
+import { getBases, getMetaData, getUser } from 'features/events'
+import { setChannels } from 'features/ChannelSlice'
+import styled from 'styled-components'
 
 function App() {
 	const { isShow, isLogin, page } = useSelector(globalStateSelector)
@@ -78,16 +80,40 @@ function App() {
 	window.mergeDispatch = mergeDispatch
 
 	useEffect(() => {
-		//checkExtensionInstalled(extensionid)
 		setTimeout(() => {
-			getBases()
-			getUser()
-		}, 5000)
+			getMetaData()
+		}, 1000)
 	}, [])
 
 	useEffect(() => {
 		const passToReact = (evt) => {
-			console.log(evt.detail)
+			if(evt?.detail){
+				const { CMD, payload } = evt?.detail
+				console.log(CMD, payload)
+				if(CMD==='META_DATA'){
+					if (payload['@user']) {
+						dispatch(setUser({ data: JSON.parse(payload['@user']) }))
+					}
+					if (payload['@bases']) {
+						dispatch(setBases({ data: JSON.parse(payload['@bases']) }))
+					}
+					if (payload['@channels']) {
+						dispatch(setChannels({ data: JSON.parse(payload['@channels']) }))
+					}
+					if (payload['@members']) {
+						dispatch(setBaseMembers({ data: JSON.parse(payload['@members']) }))
+					}
+					if (payload['@base']) {
+						dispatch(setBase({ data: JSON.parse(payload['@base']) }))
+					}
+				}
+				if(CMD==='GET_USER'){
+					dispatch(setUser({ data: JSON.parse(payload) }))
+				}
+				if (CMD === 'GET_BASES') {
+					dispatch(setBases({ data: JSON.parse(payload) }))
+				}
+			}
 		}
 		window.addEventListener('passToReact', passToReact, false) //sender
 		return () => {
@@ -115,9 +141,20 @@ function App() {
 	}
 }
 
+const GlobalStyle = styled.div`
+	> * {
+		font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji',
+			'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji' !important;
+		scroll-behavior: smooth !important;
+	}
+`
+
+
 // eslint-disable-next-line import/no-anonymous-default-export
 export default () => (
 	<Provider store={store}>
-		<App />
+		<GlobalStyle>
+			<App />
+		</GlobalStyle>
 	</Provider>
 )

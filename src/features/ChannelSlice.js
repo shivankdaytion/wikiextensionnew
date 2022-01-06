@@ -3,7 +3,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios, { DOMAIN } from './config'
 
-
 export const browseChannel = createAsyncThunk('channel/browseChannel', async ({ baseId, type = 'all', query = '', page = 1 }, thunkAPI) => {
 	try {
 		const URL = `${DOMAIN}/v1/base/${baseId}/channels?type=${type}&query=${query}&page=${page}`
@@ -73,7 +72,6 @@ export const listChannelMembers = createAsyncThunk('channel/listChannelMembers',
 		return thunkAPI.rejectWithValue(e.response.data)
 	}
 })
-
 
 export const listChannelAttachments = createAsyncThunk('channel/listChannelAttachments', async ({ channelId }, thunkAPI) => {
 	try {
@@ -494,7 +492,6 @@ export const getWikiAnalyticsElements = createAsyncThunk('channel/getWikiAnalyti
 	}
 })
 
-
 //Sequences
 
 export const listSequences = createAsyncThunk('channel/listSequences', async ({ channelId }, thunkAPI) => {
@@ -681,10 +678,6 @@ export const channelSlice = createSlice({
 		},
 		setChannel: (state, { payload }) => {
 			state.channel = payload.data
-		},
-		setChannelAttachment: (state, { payload }) => {
-			if (!state.channelattachments[payload.channelId]) state.channelattachments[payload.channelId] = []
-			state.channelattachments[payload.channelId] = [payload.data, ...state.channelattachments[payload.channelId]]
 		}
 	},
 	extraReducers: {
@@ -817,6 +810,6 @@ export const channelSlice = createSlice({
 	}
 })
 
-export const { setChannels, setChannel, setChannelAttachment } = channelSlice.actions
+export const { setChannels, setChannel } = channelSlice.actions
 
 export const channelSelector = (state) => state.channel

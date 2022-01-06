@@ -41,20 +41,28 @@ const listBase = async () => {
 	}
 }
 
-
-//PROJECT
-
-// const listBase = async () => {
-// 	const URL = DOMAIN + '/v1/base'
-// 	try {
-// 		const response = await axios.get(URL)
-// 		return response.data
-// 	} catch (err) {
-// 		return errorHandle(err)
-// 	}
-// }
 const getBaseById = async (id) => {
 	const URL = DOMAIN + `/v1/base/${id}`
+	try {
+		const response = await axios.get(URL)
+		return response.data
+	} catch (err) {
+		return errorHandle(err)
+	}
+}
+
+const getBaseMembers = async (id) => {
+	const URL = DOMAIN + `/v1/base/${id}/members`
+	try {
+		const response = await axios.get(URL)
+		return response.data
+	} catch (err) {
+		return errorHandle(err)
+	}
+}
+
+const getChannels = async (id) => {
+	const URL = DOMAIN + `/v1/base/${id}/channel/me`
 	try {
 		const response = await axios.get(URL)
 		return response.data
