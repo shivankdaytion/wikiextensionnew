@@ -660,7 +660,7 @@ export const wikiSlice = createSlice({
 	},
 	reducers: {
 		setWikiElements: (state, { payload }) => {
-			// state.wikielements = payload.data
+			state.wikielements = payload.data
 		},
 		setWikiElement: (state, { payload }) => {
 			state.wikielement = payload.data
@@ -707,6 +707,6 @@ export const wikiSlice = createSlice({
 	}
 })
 
-export const { setWikiElement } = wikiSlice.actions
+export const { setWikiElement, setWikiElements } = wikiSlice.actions
 
 export const wikiSelector = (state) => state.wiki

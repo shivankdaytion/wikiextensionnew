@@ -2,15 +2,15 @@ import { userSelector } from 'features/UserSlice'
 import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
-import { baseSelector, getBaseHomeElement, listBase } from '../../features/BaseSlice'
+import { baseSelector, getBaseHomeElement, getBaseStarredElement, listBase } from '../../features/BaseSlice'
 import { Camera } from 'react-feather'
 import { FileText } from '../../../node_modules/react-feather/dist/index'
 import { channelSelector } from 'features/ChannelSlice'
 import { timeAgo } from 'utils/helper'
 import { StyledAvatar, StyledCol, StyledRow, StyledSubTitle, StyledTitle } from 'StyledComponent'
-import { wikiSelector, setWikiElement } from 'features/WikiSlice'
-import WikiElement from './WikiElement'
-import WikiFolder from './WikiFolder'
+import { setWikiElement } from 'features/WikiSlice'
+import { useHistory } from '../../../node_modules/react-router-dom/index'
+import { setAnimation } from 'features/GlobalStateSlice'
 
 const StyledListContainer = styled.div`
 	overflow-y: auto;
@@ -56,36 +56,38 @@ const RenderContent = ({ item, members }) => {
 	)
 }
 
-const Home = ({ active }) => {
-	const { basehome, base, basemembers } = useSelector(baseSelector)
+const Starred = () => {
+	const history = useHistory()
+	const { basestarred, base, basemembers } = useSelector(baseSelector)
 	const { channels } = useSelector(channelSelector)
-	const { wikielement } = useSelector(wikiSelector)
-
 	const dispatch = useDispatch()
-	const list = useMemo(() => basehome[base?.id] || [], [base?.id, basehome])
+	const list = useMemo(() => basestarred[base?.id] || [], [base?.id, basestarred])
 	const channellist = useMemo(() => channels[base?.id] || [], [base?.id, channels])
 	const members = useMemo(() => basemembers[base?.id] || [], [base?.id, basemembers])
-	// console.log(channellist, list)
+
+
 	useEffect(() => {
-		if (base?.id) dispatch(getBaseHomeElement({ baseId: base?.id, page: 1 }))
+		if (base?.id)
+			dispatch(getBaseStarredElement({ baseId: base?.id, page: 1 })).then((response) => {
+				dispatch(setAnimation({ data: false }))			
+			})
 	}, [base?.id, dispatch])
 
-	if (wikielement?.id) {
-		
-		if (wikielement.mode === 'folder') {
-			console.log(wikielement)
-			return <WikiFolder />
+	const moveToDetail = (o) => {
+		dispatch(setWikiElement({ data: o }))
+		dispatch(setAnimation({ data: true }))
+		if (o.mode === 'folder') {
+			history.push(`/base/${base?.id}/channel/${o.channel_id}/wiki/folder/${o.id}`)
 		} else {
-			return <WikiElement wikielement={wikielement} />
+			history.push(`/base/${base?.id}/channel/${o.channel_id}/wiki/${o.id}`)
 		}
 	}
-
 	return (
 		<StyledListContainer>
 			{list.map((o) => {
 				const chn = channellist.find((item) => item.id === o.channel_id) || {}
 				return (
-					<StyledRow key={o.id} className='row' style={{ padding: 6, cursor: 'pointer' }} onClick={() => dispatch(setWikiElement({ data: o }))}>
+					<StyledRow key={o.id} className='row' style={{ padding: 6, cursor: 'pointer' }} onClick={() => moveToDetail(o)}>
 						<StyledAvatar style={{ marginTop: 3 }}>
 							<FileText />
 						</StyledAvatar>
@@ -102,4 +104,4 @@ const Home = ({ active }) => {
 		</StyledListContainer>
 	)
 }
-export default Home
+export default Starred

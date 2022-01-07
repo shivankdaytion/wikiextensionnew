@@ -15,3 +15,13 @@ export const getMetaData = async () => {
 	var event = new CustomEvent('passToBackground', { detail: message })
 	window.dispatchEvent(event)
 }
+export const switchBaseEvent = async (payload) => {
+	var message = { CMD: 'SWITCH_BASE', payload: payload }
+	var event = new CustomEvent('passToBackground', { detail: message })
+	window.dispatchEvent(event)
+}
+export const refreshMetaEvent = async () => {
+	var message = { CMD: 'REFRESH_META' }
+	var event = new CustomEvent('passToBackground', { detail: message })
+	window.dispatchEvent(event)
+}

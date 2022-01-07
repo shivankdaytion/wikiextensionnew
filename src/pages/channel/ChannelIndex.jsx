@@ -1,17 +1,17 @@
-import { userSelector } from 'features/UserSlice'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { useHistory, useParams } from 'react-router-dom'
 import styled from 'styled-components'
-import { baseSelector, getBaseHomeElement, listBase } from '../../features/BaseSlice'
-import { Camera } from 'react-feather'
-import { FileText } from '../../../node_modules/react-feather/dist/index'
+import { baseSelector } from '../../features/BaseSlice'
+import { ArrowLeft, FileText, Folder } from '../../../node_modules/react-feather/dist/index'
 import { channelSelector } from 'features/ChannelSlice'
 import { timeAgo } from 'utils/helper'
-import { StyledAvatar, StyledCol, StyledRow, StyledSubTitle, StyledTitle } from 'StyledComponent'
+import { StyledAvatar, StyledCol, StyledIcon, StyledRow, StyledSubTitle, StyledTitle } from 'StyledComponent'
 import { wikiSelector, setWikiElement, getElements, elementBreadCrumb } from 'features/WikiSlice'
-import WikiElement from './WikiElement'
-import WikiBreadCrumb from './WikiBreadCrumb'
 
+import Header from 'component/Header'
+import Progress from 'component/Progress'
+import { setAnimation } from 'features/GlobalStateSlice'
 
 const StyledListContainer = styled.div`
 	overflow-y: auto;
@@ -57,34 +57,50 @@ const RenderContent = ({ item, members }) => {
 	)
 }
 
-const WikiFolder = ({ active }) => {
-	const { basehome, base, basemembers } = useSelector(baseSelector)
+const ChannelIndex = () => {
+	const history = useHistory()
+	const { base, basemembers } = useSelector(baseSelector)
 	const { channels } = useSelector(channelSelector)
-	const { wikielements, wikielement, wikibreadcrumb } = useSelector(wikiSelector)
+	const { wikielements } = useSelector(wikiSelector)
+	const params = useParams()
 
 	const dispatch = useDispatch()
 
 	const channellist = useMemo(() => channels[base?.id] || [], [base?.id, channels])
 	const members = useMemo(() => basemembers[base?.id] || [], [base?.id, basemembers])
 	// console.log(channellist, list)
-	useEffect(() => {
-		if (wikielement?.id){
-            dispatch(getElements({ channelId: wikielement.channel_id, parentId: wikielement.id, status: 'all', page: 1 })) 
-            dispatch(elementBreadCrumb({ channelId: wikielement.channel_id, elementId: wikielement.id }))
-        }  
-	}, [dispatch, wikielement?.id])
 
-	if (wikielement?.id) {
-		return (
+	useEffect(() => {
+		dispatch(getElements({ channelId: params.channelId, parentId: params?.wikiId, status: 'all', page: 1 })).then(()=>{
+			dispatch(setAnimation({ data: false }))
+		})
+	}, [dispatch, params.channelId, params?.wikiId])
+
+	const moveToDetail = (o) => {
+		dispatch(setWikiElement({ data: o }))
+		dispatch(setAnimation({ data: true }))
+		if (o.mode === 'folder') {
+			history.push(`/base/${base?.id}/channel/${o.channel_id}/wiki/folder/${o.id}`)
+		} else {
+			history.push(`/base/${base?.id}/channel/${o.channel_id}/wiki/${o.id}`)
+		}
+	}
+
+	return (
+		<>
+			<Header />
+			<Progress key={'ChannelIndex'} />
+			<StyledRow style={{ justifyContent: 'space-between', alignItems: 'center', padding: 5 }}>
+				<StyledIcon onClick={() => history.goBack()}>
+					<ArrowLeft size={20} />
+				</StyledIcon>
+			</StyledRow>
 			<StyledListContainer>
-				<WikiBreadCrumb />
 				{wikielements.map((o) => {
 					const chn = channellist.find((item) => item.id === o.channel_id) || {}
 					return (
-						<StyledRow key={o.id} className='row' style={{ padding: 6, cursor: 'pointer' }} onClick={() => dispatch(setWikiElement({ data: o }))}>
-							<StyledAvatar style={{ marginTop: 3 }}>
-								<FileText />
-							</StyledAvatar>
+						<StyledRow key={o.id} className='row' style={{ padding: 6, cursor: 'pointer' }} onClick={() => moveToDetail(o)}>
+							<StyledAvatar style={{ marginTop: 3 }}>{o.mode === 'folder' ? <Folder /> : <FileText />}</StyledAvatar>
 							<StyledCol>
 								<StyledTitle>{o.title}</StyledTitle>
 								<StyledRow>
@@ -96,8 +112,7 @@ const WikiFolder = ({ active }) => {
 					)
 				})}
 			</StyledListContainer>
-		)
-	}
-	return null
+		</>
+	)
 }
-export default WikiFolder
+export default ChannelIndex

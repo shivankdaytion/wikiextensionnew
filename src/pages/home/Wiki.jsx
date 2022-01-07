@@ -1,10 +1,13 @@
 import { baseSelector } from 'features/BaseSlice'
 import { channelSelector } from 'features/ChannelSlice'
-import React, { useMemo } from 'react'
-import { useSelector } from 'react-redux'
+import { useEffect, useMemo } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { StyledAvatar, StyledCol, StyledRow, StyledSubTitle, StyledTitle } from 'StyledComponent'
 import { Hash } from '../../../node_modules/react-feather/dist/index'
+import { useHistory } from 'react-router-dom'
+import { setAnimation } from 'features/GlobalStateSlice'
+import { setWikiElements } from 'features/WikiSlice'
 
 const StyledListContainer = styled.div`
 	overflow-y: auto;
@@ -15,15 +18,25 @@ const StyledListContainer = styled.div`
 `
 
 export default function Wiki() {
+	const dispatch = useDispatch()
+	const history = useHistory()
 	const { base } = useSelector(baseSelector)
 	const { channels } = useSelector(channelSelector)
 	const list = useMemo(() => channels[base?.id] || [], [base?.id, channels])
+	const moveToChannel = (channelId) => {
+		dispatch(setWikiElements({ data:[] }))
+		dispatch(setAnimation({ data: true }))
+		history.push(`/base/${base.id}/channel/${channelId}`)
+	}
+	useEffect(()=>{
+		dispatch(setAnimation({ data: false }))
+	},[dispatch])
 
 	return (
 		<StyledListContainer>
 			{list.map((o) => {
 				return (
-					<StyledRow className='row' key={o.id} style={{ alignItems: 'center', padding: 6, cursor: 'pointer' }}>
+					<StyledRow className='row' key={o.id} style={{ alignItems: 'center', padding: 6, cursor: 'pointer' }} onClick={()=>moveToChannel(o.id)}>
 						<StyledAvatar>
 							<Hash size={20} />
 						</StyledAvatar>

@@ -40,6 +40,15 @@ const listBase = async () => {
 		return errorHandle(err)
 	}
 }
+const switchBase = async (id) => {
+	const URL = DOMAIN + `/v1/base/${id}/switch`
+	try {
+		const response = await axios.get(URL)
+		return response.data
+	} catch (err) {
+		return errorHandle(err)
+	}
+}
 
 const getBaseById = async (id) => {
 	const URL = DOMAIN + `/v1/base/${id}`

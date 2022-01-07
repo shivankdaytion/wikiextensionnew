@@ -43,7 +43,7 @@
 			"run_at": "document_end"
 		}
 	],
-	"web_accessible_resources": ["static/js/main.js", "static/css/main.css", "context_script/script.js"],
+	"web_accessible_resources": ["static/js/main.js", "context_script/script.js"],
 	"commands": {
 		"_execute_browser_action": {
 			"suggested_key": {

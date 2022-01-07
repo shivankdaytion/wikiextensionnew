@@ -44,14 +44,20 @@ apibrowser.runtime.onMessage.addListener((message, sender, response) => {
 			payload: window.localStorage.getItem('@bases') || '[]'
 		})
 	}
+	if (message.CMD === 'SWITCH_BASE') {
+		window.localStorage.setItem('@base', JSON.stringify(message.payload))
+		initialData()
+	}
+	if (message.CMD === 'REFRESH_META') {		
+		initialData()
+	}
 	return true
 })
 const initialData = async () => {
 	const userresponse = await getUser()
 	if (userresponse.status === 200) {
 		const user = userresponse.data.user
-		window.localStorage.setItem('@user', JSON.stringify(user))
-		
+		window.localStorage.setItem('@user', JSON.stringify(user))		
 	}
 	const basesresponse = await listBase()
 	if (basesresponse.status === 200) {
@@ -64,8 +70,7 @@ const initialData = async () => {
 			
 		} else if (bases.length) {
 			base = bases[0]
-			window.localStorage.setItem('@base', JSON.stringify(base))
-			
+			window.localStorage.setItem('@base', JSON.stringify(base))			
 		}
 		if(base?.id){
 			const response3 = await getChannels(base?.id)

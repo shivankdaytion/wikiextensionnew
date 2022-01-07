@@ -4,79 +4,78 @@ var extensionid = chrome.runtime.id
 console.log(extensionid)
 function init() {
 	setTimeout(() => {
-		var time = new Date().getTime()
-		var id = `wikiapp-bundle-script-execute-SETEXTENSION-${time}`
-		var newscript = document.createElement('script')
-		newscript.id = id
-		newscript.type = 'text/javascript'
-		newscript.innerHTML = ` window.wikidispatch({ type:'SET_EXTENSION', payload: '${extensionid}'  }); setTimeout(() => {
-			document.querySelector("#${id}").remove()
-		}, 500);`
-		document.body.appendChild(newscript)
+		// var time = new Date().getTime()
+		// var id = `wikiapp-bundle-script-execute-SETEXTENSION-${time}`
+		// var newscript = document.createElement('script')
+		// newscript.id = id
+		// newscript.type = 'text/javascript'
+		// newscript.innerHTML = ` window.wikidispatch({ type:'SET_EXTENSION', payload: '${extensionid}'  }); setTimeout(() => {
+		// 	document.querySelector("#${id}").remove()
+		// }, 500);`
+		// document.body.appendChild(newscript)
 	}, 300)
 	setTimeout(() => {
-		chrome.runtime.sendMessage(
-			{
-				CMD: 'REQUESTTOKEN'
-			},
-			function (response) {
-				if (!response) {
-					return
-				}
-				var time = new Date().getTime()
-				var id = `wikiapp-bundle-script-execute-REQUESTTOKEN-${time}`
-				var newscript = document.createElement('script')
-				newscript.id = id
-				newscript.type = 'text/javascript'
-				newscript.innerHTML = ` window.wikidispatch({ type:'SET_TOKEN', payload: '${response.data}'  }); setTimeout(() => {
-					document.querySelector("#${id}").remove()
-				}, 500);`
-				document.body.appendChild(newscript)
-			}
-		)
-		chrome.runtime.sendMessage(
-			{
-				CMD: 'REQUESTUSER'
-			},
-			function (response) {
-				if (!response) {
-					return
-				}
+		// chrome.runtime.sendMessage(
+		// 	{
+		// 		CMD: 'REQUESTTOKEN'
+		// 	},
+		// 	function (response) {
+		// 		if (!response) {
+		// 			return
+		// 		}
+		// 		var time = new Date().getTime()
+		// 		var id = `wikiapp-bundle-script-execute-REQUESTTOKEN-${time}`
+		// 		var newscript = document.createElement('script')
+		// 		newscript.id = id
+		// 		newscript.type = 'text/javascript'
+		// 		newscript.innerHTML = ` window.wikidispatch({ type:'SET_TOKEN', payload: '${response.data}'  }); setTimeout(() => {
+		// 			document.querySelector("#${id}").remove()
+		// 		}, 500);`
+		// 		document.body.appendChild(newscript)
+		// 	}
+		// )
+		// chrome.runtime.sendMessage(
+		// 	{
+		// 		CMD: 'REQUESTUSER'
+		// 	},
+		// 	function (response) {
+		// 		if (!response) {
+		// 			return
+		// 		}
 
-				var time = new Date().getTime()
-				var id = `wikiapp-bundle-script-execute-REQUESTUSER-${time}`
-				var newscript = document.createElement('script')
-				newscript.id = id
-				newscript.type = 'text/javascript'
-				newscript.innerHTML = ` window.updateDispatch({ type:'SET_USER', payload: '${response.data}'  }); setTimeout(() => {
-					document.querySelector("#${id}").remove()
-				}, 500);`
-				document.body.appendChild(newscript)
-			}
-		)
-		chrome.runtime.sendMessage(
-			{
-				CMD: 'REQUESTPROJECT'
-			},
-			function (response) {
-				if (!response) {
-					return
-				}
-				var time = new Date().getTime()
-				var id = `wikiapp-bundle-script-execute-REQUESTPROJECT-${time}`
-				var newscript = document.createElement('script')
-				newscript.id = id
-				newscript.type = 'text/javascript'
-				newscript.innerHTML = ` window.updateDispatch({ type:'PROJECTS', payload: '${response.data}'  }); setTimeout(() => {
-					document.querySelector("#${id}").remove()
-				}, 500);`
-				document.body.appendChild(newscript)
-			}
-		)
+		// 		var time = new Date().getTime()
+		// 		var id = `wikiapp-bundle-script-execute-REQUESTUSER-${time}`
+		// 		var newscript = document.createElement('script')
+		// 		newscript.id = id
+		// 		newscript.type = 'text/javascript'
+		// 		newscript.innerHTML = ` window.updateDispatch({ type:'SET_USER', payload: '${response.data}'  }); setTimeout(() => {
+		// 			document.querySelector("#${id}").remove()
+		// 		}, 500);`
+		// 		document.body.appendChild(newscript)
+		// 	}
+		// )
+		// chrome.runtime.sendMessage(
+		// 	{
+		// 		CMD: 'REQUESTPROJECT'
+		// 	},
+		// 	function (response) {
+		// 		if (!response) {
+		// 			return
+		// 		}
+		// 		var time = new Date().getTime()
+		// 		var id = `wikiapp-bundle-script-execute-REQUESTPROJECT-${time}`
+		// 		var newscript = document.createElement('script')
+		// 		newscript.id = id
+		// 		newscript.type = 'text/javascript'
+		// 		newscript.innerHTML = ` window.updateDispatch({ type:'PROJECTS', payload: '${response.data}'  }); setTimeout(() => {
+		// 			document.querySelector("#${id}").remove()
+		// 		}, 500);`
+		// 		document.body.appendChild(newscript)
+		// 	}
+		// )
 	}, 300)
 }
 function createHtml() {
-	//if(process.env.NODE_ENV === 'development') return
 	document.querySelectorAll('*[id*=wikiapp-]').forEach((e, i) => {
 		e.remove()
 	})
@@ -87,10 +86,6 @@ function createHtml() {
 	const scriptnode = document.querySelector('#wikiapp-bundle')
 	if (scriptnode) {
 		scriptnode.remove()
-	}
-	const cssnode = document.querySelector('#wikiapp-css')
-	if (cssnode) {
-		cssnode.remove()
 	}
 	var div = document.createElement('div')
 	div.id = 'wikiapp-root'
@@ -109,16 +104,14 @@ function createHtml() {
 		script.type = 'text/javascript'
 		script.src = chrome.extension.getURL('static/js/main.js')
 		document.body.appendChild(script)
+		var css = document.createElement('link')
+		css.rel = 'preload'
+		css.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap'
+		css.as = 'style'
+		document.head.appendChild(css)
 		setTimeout(() => {
 			init()
 		}, 300)
-	}, 300)
-	setTimeout(() => {
-		var css = document.createElement('link')
-		css.id = 'wikiapp-css'
-		css.rel = 'stylesheet'
-		css.href = chrome.extension.getURL('static/css/main.css')
-		document.head.appendChild(css)
 	}, 300)
 }
 

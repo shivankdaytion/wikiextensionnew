@@ -1,22 +1,110 @@
 import { useEffect } from 'react'
-import { v4 as uuidv4 } from 'uuid'
-import Main from './Main'
 
-import Header from './Header'
-import Login from './Login'
-import Search from './Search'
-import Detail from './Detail'
 import { Provider, useDispatch, useSelector } from 'react-redux'
-
-import { checkExtensionInstalled } from './utils/helper'
 import store from './features/store'
-import Styles from './App.module.css'
-import { baseSelector, setBase, setBaseMembers, setBases } from './features/BaseSlice'
+import { setBase, setBaseMembers, setBases } from './features/BaseSlice'
 import { userSelector, setUser } from './features/UserSlice'
-import { globalStateSelector } from './features/GlobalStateSlice'
-import { getBases, getMetaData, getUser } from 'features/events'
+import { globalStateSelector, setShow } from './features/GlobalStateSlice'
+import { getMetaData } from 'features/events'
 import { setChannels } from 'features/ChannelSlice'
 import styled from 'styled-components'
+import Routes from 'router/Routes'
+
+const GlobalStyle = styled.div`
+	#wikiapp-root::before,
+	#wikiapp-root::after,
+	#wikiapp-root *::before,
+	#wikiapp-root *::after {
+		all: unset;
+	}
+	.__react_component_tooltip {
+		padding: 4px 10px !important;
+		font-size: 14px !important;
+	}
+	> * {
+		font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji',
+			'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji' !important;
+		scroll-behavior: smooth !important;
+	}
+	.App {
+		width: 0px;
+		height: 100vh;
+		position: absolute;
+		top: 0px;
+		bottom: 0px;
+		right: 0px;
+		background-color: #fff;
+		box-shadow: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
+		overflow: hidden;
+	}
+
+	.App.SlideIn {
+		animation: slideIn 0.5s backwards;
+		-webkit-animation: slideIn 0.5s backwards;
+	}
+
+	.App.SlideOut {
+		animation: slideOut 0.5s forwards;
+		-webkit-animation: slideOut 0.5s forwards;
+	}
+
+	@keyframes slideIn {
+		0% {
+			transform: translateX(calc(100% + 350px));
+		}
+		100% {
+			transform: translateX(0%);
+		}
+	}
+
+	@-webkit-keyframes slideIn {
+		100% {
+			-webkit-transform: translateX(0%);
+		}
+	}
+
+	@keyframes slideOut {
+		0% {
+			-webkit-transform: translateX(0%);
+		}
+		100% {
+			-webkit-transform: translateX(calc(100% + 350px));
+		}
+	}
+
+	@-webkit-keyframes slideOut {
+		0% {
+			-webkit-transform: translateX(0%);
+		}
+		100% {
+			-webkit-transform: translateX(calc(100% + 350px));
+		}
+	}
+	.App * {
+		font-size: 14px;
+		box-sizing: border-box;
+	}
+	.App select,
+	.App input {
+		line-height: unset;
+		height: auto;
+		-webkit-appearance: none;
+		-moz-appearance: none;
+		appearance: none;
+	}
+	.App *::-webkit-scrollbar {
+		width: 5px;
+		height: 5px;
+		overflow: hidden;
+	}
+	.App *::-webkit-scrollbar-thumb {
+		background: #888;
+	}
+	.App *::-webkit-scrollbar-track {
+		background: #f1f1f1;
+		height: 5px;
+	}
+`
 
 function App() {
 	const { isShow, isLogin, page } = useSelector(globalStateSelector)
@@ -87,10 +175,12 @@ function App() {
 
 	useEffect(() => {
 		const passToReact = (evt) => {
-			if(evt?.detail){
+			if (evt?.detail) {
 				const { CMD, payload } = evt?.detail
-				console.log(CMD, payload)
-				if(CMD==='META_DATA'){
+				if (CMD === 'SHOWPOP') {
+					dispatch(setShow({ data: true }))
+				}
+				if (CMD === 'META_DATA') {
 					if (payload['@user']) {
 						dispatch(setUser({ data: JSON.parse(payload['@user']) }))
 					}
@@ -107,7 +197,7 @@ function App() {
 						dispatch(setBase({ data: JSON.parse(payload['@base']) }))
 					}
 				}
-				if(CMD==='GET_USER'){
+				if (CMD === 'GET_USER') {
 					dispatch(setUser({ data: JSON.parse(payload) }))
 				}
 				if (CMD === 'GET_BASES') {
@@ -120,35 +210,24 @@ function App() {
 			window.removeEventListener('passToReact', passToReact, false) //sender
 		}
 	}, [dispatch])
+	return (
+		<div className={`${'App'} ${isShow ? 'SlideIn' : 'SlideOut'}`} style={{ width: isShow ? '350px' : '0px', overflow: 'hidden' }}>
+			<Routes />
+		</div>
+	)
 
-	if (isLogin) {
-		return (
-			<div
-				className={`${Styles.App} ${isShow ? Styles.SlideIn : Styles.SlideOut}`}
-				style={{ width: isShow ? '350px' : '0px', overflow: isShow ? 'visible' : 'hidden' }}>
-				<Header />
-				<Main />
-			</div>
-		)
-	} else {
-		return (
-			<div
-				className={`${Styles.App} ${isShow ? Styles.SlideIn : Styles.SlideOut}`}
-				style={{ width: isShow ? '350px' : '0px', overflow: isShow ? 'visible' : 'hidden' }}>
-				<Login />
-			</div>
-		)
-	}
+	// if (isLogin) {
+	//
+	// } else {
+	// 	return (
+	// 		<div
+	// 			className={`${Styles.App} ${isShow ? Styles.SlideIn : Styles.SlideOut}`}
+	// 			style={{ width: isShow ? '350px' : '0px', overflow: isShow ? 'visible' : 'hidden' }}>
+	// 			<Login />
+	// 		</div>
+	// 	)
+	// }
 }
-
-const GlobalStyle = styled.div`
-	> * {
-		font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji',
-			'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji' !important;
-		scroll-behavior: smooth !important;
-	}
-`
-
 
 // eslint-disable-next-line import/no-anonymous-default-export
 export default () => (
