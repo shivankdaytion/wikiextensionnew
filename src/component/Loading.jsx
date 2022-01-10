@@ -1,5 +1,4 @@
 import styled from 'styled-components'
-import Styles from './Loading.module.css'
 
 const StyledLoading = styled.div`
 	display: flex;
@@ -8,14 +7,13 @@ const StyledLoading = styled.div`
 	justify-content: center;
 	align-items: center;
 	.loader {
-		border: 5px solid #f3f3f3; /* Light grey */
-		border-top: 5px solid #3498db; /* Blue */
+		border: 2px solid #f3f3f3; /* Light grey */
+		border-top: 2px solid #3498db; /* Blue */
 		border-radius: 50%;
-		width: 40px;
-		height: 40px;
+		width: 20px;
+		height: 20px;
 		animation: spin 2s linear infinite;
 	}
-
 	@keyframes spin {
 		0% {
 			transform: rotate(0deg);
@@ -27,11 +25,18 @@ const StyledLoading = styled.div`
 `
 
 
-export default function Loading() {
+export default function Loading({ size }) {
+	if(size==='small'){
+	return (
+		<StyledLoading style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+			<div className={'loader'}></div>
+		</StyledLoading>
+	)	
+	}
 	return (
 		<StyledLoading
 			style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200, width: '100%' }}>
-			<div className={Styles.loader}></div>
+			<div className={'loader'}></div>
 		</StyledLoading>
 	)
 }

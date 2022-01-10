@@ -5,29 +5,36 @@ import WikiFolder from 'pages/home/WikiFolder'
 import Login from 'pages/Login'
 import { MemoryRouter, Route, Switch } from 'react-router-dom'
 import ProtectedRoute from './ProtectedRoute'
-import Progress from 'component/Progress'
+import Header from 'component/Header'
+import Search from 'pages/Search'
 
 
 const Screens = () => {
 	return (
-		<Switch>
-			{/* AUTH ROUTES */}
-			<ProtectedRoute exact path='/'>
-				<HomeIndex />
-			</ProtectedRoute>
-			<ProtectedRoute exact path='/base/:baseId/channel/:channelId/wiki/folder/:wikiId'>
-				<WikiFolder />
-			</ProtectedRoute>
-			<ProtectedRoute exact path='/base/:baseId/channel/:channelId/wiki/:wikiId'>
-				<WikiElement />
-			</ProtectedRoute>
-			<ProtectedRoute exact path='/base/:baseId/channel/:channelId'>
-				<ChannelIndex />
-			</ProtectedRoute>
-			<Route exact path='/login'>
-				<Login />
-			</Route>
-		</Switch>
+		<>
+			<Header />
+			<Switch>
+				{/* AUTH ROUTES */}
+				<ProtectedRoute exact path='/'>
+					<HomeIndex />
+				</ProtectedRoute>
+				<ProtectedRoute exact path='/base/:baseId/search'>
+					<Search />
+				</ProtectedRoute>
+				<ProtectedRoute exact path='/base/:baseId/channel/:channelId/wiki/folder/:wikiId'>
+					<WikiFolder />
+				</ProtectedRoute>
+				<ProtectedRoute exact path='/base/:baseId/channel/:channelId/wiki/:wikiId'>
+					<WikiElement />
+				</ProtectedRoute>
+				<ProtectedRoute exact path='/base/:baseId/channel/:channelId'>
+					<ChannelIndex />
+				</ProtectedRoute>
+				<Route exact path='/login'>
+					<Login />
+				</Route>
+			</Switch>
+		</>
 	)
 }
 const Routes = () => {

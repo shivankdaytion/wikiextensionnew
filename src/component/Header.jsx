@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, memo, useRef } from 'react'
 import { X, ChevronDown } from 'react-feather'
 import { useSelector, useDispatch } from 'react-redux'
 import { baseSelector, setBase, switchBase } from '../features/BaseSlice'
@@ -6,9 +6,26 @@ import styled from 'styled-components'
 import { StyledCol, StyledIcon, StyledRow, StyledSubTitle } from 'StyledComponent'
 import { userSelector } from 'features/UserSlice'
 import { useHistory } from '../../node_modules/react-router-dom/index'
-import {  RefreshCw } from '../../node_modules/react-feather/dist/index'
-import { setShow } from 'features/GlobalStateSlice'
+import { RefreshCw } from '../../node_modules/react-feather/dist/index'
+import { globalStateSelector, setRefreshMetaData, setSearchText, setShow } from 'features/GlobalStateSlice'
 import { refreshMetaEvent, switchBaseEvent } from 'features/events'
+import Loading from './Loading'
+import ReactTooltip from 'react-tooltip'
+
+const StyledRefreshCw = styled(RefreshCw)`
+	animation: spin 2s linear infinite;
+	animation-fill-mode: forwards;
+	animation-play-state: ${(props) => (props.loading ? 'running' : 'paused')};
+	@keyframes spin {
+		0% {
+			transform: rotate(0deg);
+		}
+		100% {
+			transform: rotate(360deg);
+		}
+	}
+`
+
 
 const StyledHeader = styled.div`
 	padding: 5px 10px;
@@ -47,13 +64,25 @@ const StyledHeader = styled.div`
 			background: #ccc;
 		}
 	}
-	.HeadTitle Select {
+	.HeadTitle select {
 		background-color: transparent;
 		color: #fff;
 		outline: none;
 		border: none;
 		width: 100px;
 		text-overflow: ellipsis;
+	}
+	select:after {
+		content: '▼';
+		position: absolute;
+		left: 18px;
+		top: 50px;
+		width: 0;
+		height: 0;
+		border-left: 20px solid transparent;
+		border-right: 20px solid transparent;
+		border-top: 20px solid #000;
+		clear: both;
 	}
 	.HeadSearch input {
 		-webkit-box-sizing: border-box;
@@ -81,53 +110,44 @@ const StyledHeader = styled.div`
 		border-radius: 3px;
 	}
 `
-
-export default function Header() {
+const Header = () => {
 	const dispatch = useDispatch()
 	const history = useHistory()
 	const { bases, base } = useSelector(baseSelector)
 	const { user } = useSelector(userSelector)
+	const { refreshMetaData, searchText } = useSelector(globalStateSelector)
 
-	//const { isshow, token, user, projects, searchtext } = state
+	const searchTextRef = useRef(null)
+	const selectRef = useRef(null)
 
-	const _searchChange = async (e) => {
-		// const text = e.currentTarget.value
-		// if (e.keyCode === 13 && text.length > 3) {
-		// 	dispatch({ type: 'NOTEDETAIL', payload: {} })
-		// 	dispatch({ type: 'SEARCHRESULTLOADING', payload: true })
-		// 	dispatch({ type: 'SEARCHRESULT', payload: [] })
-		// 	dispatch({ type: 'SET_PAGE', payload: 'SEARCH' })
-		// 	//const projectId = user.current_project
-		// 	//search(projectId, text)
-		// 	return
-		// }
-		// dispatch({ type: 'SETSEARCH', payload: text })
-	}
+	
 	const _reset = () => {
-		dispatch(setShow({data: false}))
+		dispatch(setShow({ data: false }))
+		dispatch(setSearchText({ data: '' }))
 		document.getElementById('searchtext').value = ''
+		history.push(`/`)
 	}
 	const _refresh = () => {
+		dispatch(setRefreshMetaData({ data: true }))
 		refreshMetaEvent()
 	}
-	
-	const currentProject = (projid) => {		
+	useEffect(() => {
+		searchTextRef.current.value = searchText
+		if(searchText.length){
+			history.push(`/base/${base?.id}/search`)
+		}
+	}, [base?.id, history, searchText])
+
+	const currentProject = (projid) => {
 		const newbase = bases.find((o) => o.id === parseInt(projid))
 		if (newbase) {
 			dispatch(setBase({ data: newbase }))
-			dispatch(switchBase({ baseId: newbase.id  })).then(()=>{
-				switchBaseEvent(newbase)				
+			dispatch(switchBase({ baseId: newbase.id })).then(() => {
+				switchBaseEvent(newbase)
 			})
-		}	
+		}
 		history.push(`/`)
 	}
-
-	useEffect(() => {
-		if (bases?.length) {
-			//dispatch(setBase({ data: bases[0] }))
-		}
-	}, [bases])
-
 	return (
 		<>
 			<StyledHeader>
@@ -136,8 +156,8 @@ export default function Header() {
 						{base.logo ? <img alt='' src={base.logo} /> : <div className='logoText'>{base?.name && base?.name[0]}</div>}
 						<StyledCol>
 							<StyledRow style={{ alignItems: 'center' }}>
-								<select value={base?.id || 0} onChange={(e) => currentProject(e.currentTarget.value)}>
-									{bases.map((o, i) => {
+								<select ref={selectRef} value={base?.id || 0} onChange={(e) => currentProject(e.currentTarget.value)}>
+									{bases.map((o) => {
 										return (
 											<option key={o.id} value={o.id}>
 												{o.name}
@@ -151,8 +171,8 @@ export default function Header() {
 						</StyledCol>
 					</div>
 					<StyledRow style={{ width: 45, justifyContent: 'space-between', alignItems: 'center' }}>
-						<StyledIcon onClick={_refresh}>
-							<RefreshCw color={'#FFF'} size={18} />
+						<StyledIcon data-tip data-for='Refresh' onClick={_refresh}>
+							<StyledRefreshCw loading={refreshMetaData} color={'#FFF'} size={18} />
 						</StyledIcon>
 						<StyledIcon onClick={_reset}>
 							<X color={'#FFF'} size={20} />
@@ -160,15 +180,14 @@ export default function Header() {
 					</StyledRow>
 				</div>
 				<div className={'HeadSearch'}>
-					<input
-						id='searchtext'
-						type='search'
-						placeholder='Search....'
-						//defaultValue={searchtext}
-						onKeyDown={_searchChange}
-					/>
+					<input id='searchtext' type='search' ref={searchTextRef} placeholder='Search....' defaultValue={searchText} />
 				</div>
 			</StyledHeader>
+			<ReactTooltip id='Refresh' place='top' effect='solid' arrowColor={'#333'}>
+				Refresh
+			</ReactTooltip>
 		</>
 	)
 }
+
+export default Header

@@ -8,6 +8,7 @@ import { Hash } from '../../../node_modules/react-feather/dist/index'
 import { useHistory } from 'react-router-dom'
 import { setAnimation } from 'features/GlobalStateSlice'
 import { setWikiElements } from 'features/WikiSlice'
+import Nodata from 'component/Nodata'
 
 const StyledListContainer = styled.div`
 	overflow-y: auto;
@@ -23,30 +24,40 @@ export default function Wiki() {
 	const { base } = useSelector(baseSelector)
 	const { channels } = useSelector(channelSelector)
 	const list = useMemo(() => channels[base?.id] || [], [base?.id, channels])
+
 	const moveToChannel = (channelId) => {
 		dispatch(setWikiElements({ data:[] }))
 		dispatch(setAnimation({ data: true }))
 		history.push(`/base/${base.id}/channel/${channelId}`)
 	}
+	
 	useEffect(()=>{
 		dispatch(setAnimation({ data: false }))
 	},[dispatch])
 
 	return (
 		<StyledListContainer>
-			{list.map((o) => {
-				return (
-					<StyledRow className='row' key={o.id} style={{ alignItems: 'center', padding: 6, cursor: 'pointer' }} onClick={()=>moveToChannel(o.id)}>
-						<StyledAvatar>
-							<Hash size={20} />
-						</StyledAvatar>
-						<StyledCol>
-							<StyledTitle>{o.name}</StyledTitle>
-							<StyledSubTitle>{o.purpose}</StyledSubTitle>
-						</StyledCol>
-					</StyledRow>
-				)
-			})}
+			{list.length ? (
+				list.map((o) => {
+					return (
+						<StyledRow
+							className='row'
+							key={o.id}
+							style={{ alignItems: 'center', padding: 6, cursor: 'pointer' }}
+							onClick={() => moveToChannel(o.id)}>
+							<StyledAvatar>
+								<Hash size={20} />
+							</StyledAvatar>
+							<StyledCol>
+								<StyledTitle>{o.name}</StyledTitle>
+								<StyledSubTitle>{o.purpose}</StyledSubTitle>
+							</StyledCol>
+						</StyledRow>
+					)
+				})
+			) : (
+				<Nodata loading={true} />
+			)}
 		</StyledListContainer>
 	)
 }

@@ -122,7 +122,7 @@ const passToReact = (cmd, payload) => {
 	window.dispatchEvent(event)
 }
 
-createHtml()
+//createHtml()
 const onMessage = (request, sender, response) => {
 	if (!sender) {
 		return

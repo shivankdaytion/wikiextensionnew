@@ -4,17 +4,21 @@ import { Provider, useDispatch, useSelector } from 'react-redux'
 import store from './features/store'
 import { setBase, setBaseMembers, setBases } from './features/BaseSlice'
 import { userSelector, setUser } from './features/UserSlice'
-import { globalStateSelector, setShow } from './features/GlobalStateSlice'
+import { globalStateSelector, setAnimation, setRefreshMetaData, setSearchText, setShow } from './features/GlobalStateSlice'
 import { getMetaData } from 'features/events'
 import { setChannels } from 'features/ChannelSlice'
 import styled from 'styled-components'
 import Routes from 'router/Routes'
+import { setRecentElements } from 'features/WikiSlice'
 
 const GlobalStyle = styled.div`
 	#wikiapp-root::before,
 	#wikiapp-root::after,
 	#wikiapp-root *::before,
 	#wikiapp-root *::after {
+		all: unset;
+	}
+	#wikiapp-root * {
 		all: unset;
 	}
 	.__react_component_tooltip {
@@ -25,6 +29,7 @@ const GlobalStyle = styled.div`
 		font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji',
 			'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji' !important;
 		scroll-behavior: smooth !important;
+		color: rgba(0, 0, 0, 0.6) !important;
 	}
 	.App {
 		width: 0px;
@@ -111,61 +116,9 @@ function App() {
 	const { user } = useSelector(userSelector)
 	const dispatch = useDispatch()
 
-	console.log(isShow, isLogin)
-	//const { extensionid, projects, , searchtext, notedetail, recent } = {}
-
-	const _isshow = () => {
-		// if (isshow) {
-		// 	dispatch({ type: 'ISSHOW', payload: false })
-		// } else {
-		// 	dispatch({ type: 'ISSHOW', payload: true })
-		// }
-	}
 	const _search = async (text) => {
-		// dispatch({ type: 'ISSHOW', payload: true })
-		// dispatch({ type: 'SETSEARCH', payload: text })
-		// dispatch({ type: 'SET_PAGE', payload: 'SEARCH' })
-		// const searchnode = document.getElementById('searchtext')
-		// if (searchnode) {
-		// 	searchnode.value = text
-		// }
-		// dispatch({ type: 'NOTEDETAIL', payload: {} })
-		// dispatch({ type: 'SEARCHRESULTLOADING', payload: true })
-		// dispatch({ type: 'SEARCHRESULT', payload: [] })
-		// if (user.current_project) {
-		// 	search(user.current_project, text)
-		// }
+
 	}
-	const isJson = (str) => {
-		try {
-			JSON.parse(str)
-		} catch (e) {
-			return false
-		}
-		return true
-	}
-	const updateDispatch = (data) => {
-		// if (isJson(data.payload)) {
-		// 	data.payload = JSON.parse(data.payload)
-		// }
-		// if (Array.isArray(data.payload)) {
-		// 	data.payload = data.payload
-		// }
-		// dispatch(data)
-	}
-	const mergeDispatch = (data) => {
-		// if (isJson(data.payload)) {
-		// 	data.payload = [...recent, ...JSON.parse(data.payload)]
-		// }
-		// if (Array.isArray(data.payload)) {
-		// 	data.payload = [...recent, ...data.payload]
-		// }
-		// dispatch(data)
-	}
-	window._isshow = _isshow
-	window._search = _search
-	window.updateDispatch = updateDispatch
-	window.mergeDispatch = mergeDispatch
 
 	useEffect(() => {
 		setTimeout(() => {
@@ -180,7 +133,12 @@ function App() {
 				if (CMD === 'SHOWPOP') {
 					dispatch(setShow({ data: true }))
 				}
+				if (CMD === 'SEARCH') {
+					dispatch(setShow({ data: true }))
+					dispatch(setSearchText({ data: payload }))
+				}
 				if (CMD === 'META_DATA') {
+					dispatch(setRefreshMetaData({ data: false }))
 					if (payload['@user']) {
 						dispatch(setUser({ data: JSON.parse(payload['@user']) }))
 					}
@@ -196,12 +154,19 @@ function App() {
 					if (payload['@base']) {
 						dispatch(setBase({ data: JSON.parse(payload['@base']) }))
 					}
+					if (payload['@recent']) {
+						dispatch(setRecentElements({ data: JSON.parse(payload['@recent']) }))
+					}
 				}
 				if (CMD === 'GET_USER') {
 					dispatch(setUser({ data: JSON.parse(payload) }))
 				}
 				if (CMD === 'GET_BASES') {
 					dispatch(setBases({ data: JSON.parse(payload) }))
+				}
+				if (CMD === 'GET_RECENT_ELEMENT') {
+					dispatch(setRecentElements({ data: JSON.parse(payload) }))
+					dispatch(setAnimation({ data: false }))
 				}
 			}
 		}
@@ -210,23 +175,12 @@ function App() {
 			window.removeEventListener('passToReact', passToReact, false) //sender
 		}
 	}, [dispatch])
+
 	return (
 		<div className={`${'App'} ${isShow ? 'SlideIn' : 'SlideOut'}`} style={{ width: isShow ? '350px' : '0px', overflow: 'hidden' }}>
 			<Routes />
 		</div>
 	)
-
-	// if (isLogin) {
-	//
-	// } else {
-	// 	return (
-	// 		<div
-	// 			className={`${Styles.App} ${isShow ? Styles.SlideIn : Styles.SlideOut}`}
-	// 			style={{ width: isShow ? '350px' : '0px', overflow: isShow ? 'visible' : 'hidden' }}>
-	// 			<Login />
-	// 		</div>
-	// 	)
-	// }
 }
 
 // eslint-disable-next-line import/no-anonymous-default-export

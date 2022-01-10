@@ -32,6 +32,15 @@ export const GetToken = () => {
 	const state = {} //useTrackedState()
 	return [state]
 }
+export const uniqueArray = (arr, key) => {
+	var result = arr.reduce((unique, o) => {
+		if (!unique.some((obj) => obj[key] === o[key])) {
+			unique.push(o)
+		}
+		return unique
+	}, [])
+	return result
+}
 var check
 export const checkExtensionInstalled = async (extensionid) => {
 	// window.clearTimeout(check);

@@ -12,6 +12,9 @@ import { wikiSelector, setWikiElement, getElements, elementBreadCrumb } from 'fe
 import Header from 'component/Header'
 import Progress from 'component/Progress'
 import { setAnimation } from 'features/GlobalStateSlice'
+import Nodata from 'component/Nodata'
+import InfiniteScroll from '../../../node_modules/react-infinite-scroll-component/dist/index'
+import Loading from 'component/Loading'
 
 const StyledListContainer = styled.div`
 	overflow-y: auto;
@@ -61,7 +64,7 @@ const ChannelIndex = () => {
 	const history = useHistory()
 	const { base, basemembers } = useSelector(baseSelector)
 	const { channels } = useSelector(channelSelector)
-	const { wikielements } = useSelector(wikiSelector)
+	const { wikielements, wikielementspagination } = useSelector(wikiSelector)
 	const params = useParams()
 
 	const dispatch = useDispatch()
@@ -71,7 +74,7 @@ const ChannelIndex = () => {
 	// console.log(channellist, list)
 
 	useEffect(() => {
-		dispatch(getElements({ channelId: params.channelId, parentId: params?.wikiId, status: 'all', page: 1 })).then(()=>{
+		dispatch(getElements({ channelId: params.channelId, parentId: params?.wikiId, status: 'all', page: 1 })).then(() => {
 			dispatch(setAnimation({ data: false }))
 		})
 	}, [dispatch, params.channelId, params?.wikiId])
@@ -85,10 +88,13 @@ const ChannelIndex = () => {
 			history.push(`/base/${base?.id}/channel/${o.channel_id}/wiki/${o.id}`)
 		}
 	}
-
+	const fetchData = (page) => {
+		dispatch(getElements({ channelId: params.channelId, parentId: params?.wikiId, status: 'all', page: page })).then(() => {
+			dispatch(setAnimation({ data: false }))
+		})
+	}
 	return (
 		<>
-			<Header />
 			<Progress key={'ChannelIndex'} />
 			<StyledRow style={{ justifyContent: 'space-between', alignItems: 'center', padding: 5 }}>
 				<StyledIcon onClick={() => history.goBack()}>
@@ -96,21 +102,33 @@ const ChannelIndex = () => {
 				</StyledIcon>
 			</StyledRow>
 			<StyledListContainer>
-				{wikielements.map((o) => {
-					const chn = channellist.find((item) => item.id === o.channel_id) || {}
-					return (
-						<StyledRow key={o.id} className='row' style={{ padding: 6, cursor: 'pointer' }} onClick={() => moveToDetail(o)}>
-							<StyledAvatar style={{ marginTop: 3 }}>{o.mode === 'folder' ? <Folder /> : <FileText />}</StyledAvatar>
-							<StyledCol>
-								<StyledTitle>{o.title}</StyledTitle>
-								<StyledRow>
-									<StyledSubTitle>#{chn.name}</StyledSubTitle>
-									<RenderContent item={o} members={members} />
+				<InfiniteScroll
+					dataLength={wikielements.length} //This is important field to render the next data
+					next={() => fetchData(wikielementspagination.page)}
+					hasMore={true}
+					loader={wikielementspagination.loading && <Loading />}
+					scrollableTarget='wikifolder'
+					endMessage={null}>
+					{wikielements.length ? (
+						wikielements.map((o) => {
+							const chn = channellist.find((item) => item.id === o.channel_id) || {}
+							return (
+								<StyledRow key={o.id} className='row' style={{ padding: 6, cursor: 'pointer' }} onClick={() => moveToDetail(o)}>
+									<StyledAvatar style={{ marginTop: 3 }}>{o.mode === 'folder' ? <Folder /> : <FileText />}</StyledAvatar>
+									<StyledCol>
+										<StyledTitle>{o.title}</StyledTitle>
+										<StyledRow>
+											<StyledSubTitle>#{chn.name}</StyledSubTitle>
+											<RenderContent item={o} members={members} />
+										</StyledRow>
+									</StyledCol>
 								</StyledRow>
-							</StyledCol>
-						</StyledRow>
-					)
-				})}
+							)
+						})
+					) : (
+						<Nodata loading={wikielementspagination.loading} />
+					)}
+				</InfiniteScroll>
 			</StyledListContainer>
 		</>
 	)

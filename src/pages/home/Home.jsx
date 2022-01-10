@@ -13,6 +13,9 @@ import WikiElement from './WikiElement'
 import WikiFolder from './WikiFolder'
 import { useHistory } from 'react-router-dom'
 import { setAnimation } from 'features/GlobalStateSlice'
+import InfiniteScroll from 'react-infinite-scroll-component'
+import Loading from 'component/Loading'
+import Nodata from 'component/Nodata'
 
 const StyledListContainer = styled.div`
 	overflow-y: auto;
@@ -60,48 +63,66 @@ const RenderContent = ({ item, members }) => {
 
 const Home = ({ active }) => {
 	const history = useHistory()
-	const { basehome, base, basemembers } = useSelector(baseSelector)
+	const { basehome, base, basemembers, basehomepagination } = useSelector(baseSelector)
 	const { channels } = useSelector(channelSelector)
 	const dispatch = useDispatch()
 
 	const list = useMemo(() => basehome[base?.id] || [], [base?.id, basehome])
 	const channellist = useMemo(() => channels[base?.id] || [], [base?.id, channels])
 	const members = useMemo(() => basemembers[base?.id] || [], [base?.id, basemembers])
-	
-
 
 	useEffect(() => {
-		if (base?.id) dispatch(getBaseHomeElement({ baseId: base?.id, page: 1 })).then((response) => {
-			dispatch(setAnimation({ data: false }))
-		})
+		if (base?.id) {
+			dispatch(setAnimation({ data: true }))
+			dispatch(getBaseHomeElement({ baseId: base?.id, page: 1 })).then((response) => {
+				dispatch(setAnimation({ data: false }))
+			})
+		}
 	}, [base?.id, dispatch])
 
 	const moveToDetail = (o) => {
 		dispatch(setWikiElement({ data: o }))
 		dispatch(setAnimation({ data: true }))
-		if(o.mode==='folder'){
+		if (o.mode === 'folder') {
 			history.push(`/base/${base?.id}/channel/${o.channel_id}/wiki/folder/${o.id}`)
-		}else{
+		} else {
 			history.push(`/base/${base?.id}/channel/${o.channel_id}/wiki/${o.id}`)
-		}		
+		}
+	}
+	const fetchData = (page) => {
+		dispatch(getBaseHomeElement({ baseId: base?.id, page: page })).then((response) => {
+			dispatch(setAnimation({ data: false }))
+		})
 	}
 	return (
-		<StyledListContainer>
-			{list.map((o) => {
-				const chn = channellist.find((item) => item.id === o.channel_id) || {}
-				return (
-					<StyledRow key={o.id} className='row' style={{ padding: 6, cursor: 'pointer' }} onClick={() => moveToDetail(o)}>
-						<StyledAvatar style={{ marginTop: 3 }}>{o.mode === 'folder' ? <Folder /> : <FileText />}</StyledAvatar>
-						<StyledCol>
-							<StyledTitle>{o.title}</StyledTitle>
-							<StyledRow>
-								<StyledSubTitle>#{chn.name}</StyledSubTitle>
-								<RenderContent item={o} members={members} />
+		<StyledListContainer id='home'>
+			<InfiniteScroll
+				dataLength={list.length} //This is important field to render the next data
+				next={() => fetchData(basehomepagination.page)}
+				hasMore={true}
+				loader={basehomepagination.loading && <Loading />}
+				scrollableTarget='home'
+				endMessage={null}>
+				{list.length ? (
+					list.map((o) => {
+						const chn = channellist.find((item) => item.id === o.channel_id) || {}
+						return (
+							<StyledRow key={o.id} className='row' style={{ padding: 6, cursor: 'pointer' }} onClick={() => moveToDetail(o)}>
+								<StyledAvatar style={{ marginTop: 3 }}>{o.mode === 'folder' ? <Folder /> : <FileText />}</StyledAvatar>
+								<StyledCol>
+									<StyledTitle>{o.title}</StyledTitle>
+									<StyledRow>
+										<StyledSubTitle>#{chn.name}</StyledSubTitle>
+										<RenderContent item={o} members={members} />
+									</StyledRow>
+								</StyledCol>
 							</StyledRow>
-						</StyledCol>
-					</StyledRow>
-				)
-			})}
+						)
+					})
+				) : (
+					<Nodata loading={basehomepagination.loading} />
+				)}
+			</InfiniteScroll>
 		</StyledListContainer>
 	)
 }

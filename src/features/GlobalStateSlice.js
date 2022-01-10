@@ -2,17 +2,23 @@ import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = {
 	isLogin: true,
-	isShow: false,
-	page: 'Home',
+	isShow: true,
+	page: 'Recent',
 	subpage: '',
 	params: {},
 	isAnimating: false,
+	refreshMetaData: false,
+	searchText: '',
 } 
 
 export const globalStateSlice = createSlice({
 	name: 'globalState',
 	initialState: initialState,
 	reducers: {
+		setRefreshMetaData: (state, { payload }) => {
+			state.refreshMetaData = payload.data
+			return state
+		},
 		setShow: (state, { payload }) => {
 			state.isShow = payload.data
 			return state
@@ -34,11 +40,15 @@ export const globalStateSlice = createSlice({
 				state.isAnimating = payload.data
 			}
 			return state
+		},
+		setSearchText:(state, { payload }) =>{
+			state.searchText = payload.data
+			return state
 		}
 	},
 	extraReducers: {}
 })
 
-export const { setPage, setSubpage, setParams, setAnimation, setShow } = globalStateSlice.actions
+export const { setPage, setSubpage, setParams, setAnimation, setShow, setRefreshMetaData, setSearchText } = globalStateSlice.actions
 
 export const globalStateSelector = (state) => state.globalState

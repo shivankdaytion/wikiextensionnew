@@ -1,6 +1,9 @@
 import styled from 'styled-components'
 export const StyledAvatar = styled.div`
 	padding: 5px;
+	svg {
+		color: rgba(0, 0, 0, 0.4);
+	}
 `
 export const StyledRow = styled.div`
 	display: flex;
@@ -11,11 +14,11 @@ export const StyledCol = styled.div`
 export const StyledTitle = styled.div`
 	font-size: 14px;
 	font-weight: 400;
+	color: rgba(0,0,0,0.8) !important;
 `
 export const StyledSubTitle = styled.div`
-	font-size: 12px !important;
-	color: rgba(0, 0, 0, 0.8);
-	font-weight: 200;
+	font-size: 11px !important;
+	font-weight: 400;
 `
 
 export const StyledLink = styled.a`

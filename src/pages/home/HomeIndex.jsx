@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { memo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import Starred from './Starred'
@@ -10,6 +10,7 @@ import { setWikiElement } from 'features/WikiSlice'
 import styled from 'styled-components'
 import Header from 'component/Header'
 import Progress from 'component/Progress'
+import Recent from './Recent'
 
 const StyledMain = styled.div`
 	overflow: hidden;
@@ -45,7 +46,7 @@ const StyledMain = styled.div`
 	.Content {
 		-webkit-transition: all 0.3s;
 		transition: all 0.3s;
-		height: calc(100vh - 95px);
+		height: calc(100vh - 140px);
 		position: relative;
 	}
 	.Content.active {
@@ -96,8 +97,8 @@ const MainComponent = ({ page }) => {
 		return <Home />
 	} else if (page === 'Wiki') {
 		return <Wiki />
-	} else if (page === 'Ask') {
-		return <Ask />
+	} else if (page === 'Recent') {
+		return <Recent />
 	} else if (page === 'Starred') {
 		return <Starred />
 	}
@@ -107,7 +108,6 @@ const MainComponent = ({ page }) => {
 function HomeIndex() {
 	const dispatch = useDispatch()
 	const { page } = useSelector(globalStateSelector)
-	//const [active, setActive] = useState('Home')
 
 	const switchTab = (page) => {
 		dispatch(setPage({ data: page }))
@@ -117,10 +117,12 @@ function HomeIndex() {
 
 	return (
 		<>
-			<Header />
 			<StyledMain className={'Tab'}>
 				<div className={'Tabbar'}>
 					<ul>
+						<li onClick={() => switchTab('Recent')} className={`${page === 'Recent' ? 'active' : null}`}>
+							Recent
+						</li>
 						<li onClick={() => switchTab('Home')} className={`${page === 'Home' ? 'active' : null}`}>
 							Home
 						</li>
@@ -140,4 +142,4 @@ function HomeIndex() {
 		</>
 	)
 }
-export default HomeIndex
+export default memo(HomeIndex)

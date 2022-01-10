@@ -25,3 +25,13 @@ export const refreshMetaEvent = async () => {
 	var event = new CustomEvent('passToBackground', { detail: message })
 	window.dispatchEvent(event)
 }
+export const recentEvent = async () => {
+	var message = { CMD: 'GET_RECENT_ELEMENT' }
+	var event = new CustomEvent('passToBackground', { detail: message })
+	window.dispatchEvent(event)
+}
+export const setRecentEvent = async (payload) => {
+	var message = { CMD: 'SET_RECENT_ELEMENT', payload: payload }
+	var event = new CustomEvent('passToBackground', { detail: message })
+	window.dispatchEvent(event)
+}

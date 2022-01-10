@@ -12,6 +12,8 @@ import { timeAgo } from 'utils/helper'
 import { ArrowLeft, Check, CheckCircle, Copy, ExternalLink, Link, ThumbsDown, ThumbsUp } from '../../../node_modules/react-feather/dist/index'
 import toast, { Toaster } from 'react-hot-toast'
 import ReactTooltip from 'react-tooltip'
+import { setRecentEvent } from 'features/events'
+import { baseSelector } from 'features/BaseSlice'
 
 
 const StyledContainer = styled.div`
@@ -44,34 +46,47 @@ export default function WikiElement() {
 	const history = useHistory()
 	const dispatch = useDispatch()
 	const { wikielement } = useSelector(wikiSelector)
-	useEffect(()=>{
+	const { base } = useSelector(baseSelector)
+	useEffect(() => {
+		setRecentEvent({ base, wikielement})
 		dispatch(setAnimation({ data: false }))
-	},[dispatch])
+	}, [dispatch, wikielement])
 
 	const copyText = useCallback((item) => {
 		const blobInput = new Blob([item.content], { type: 'text/html' })
 		const clipboardItemInput = new window.ClipboardItem({ 'text/html': blobInput })
 		navigator.clipboard.write([clipboardItemInput])
-		toast.success('Text Copied...', { icon: <Check size={14} color='green' />, duration: 1000 })
+		toast.success('Text Copied...', {
+			icon: <Check size={14} color='green' />,
+			duration: 1000,
+			style: { backgroundColor: 'rgba(0,0,0,0.8)', color: '#FFF' }
+		})
 	}, [])
 	const copylink = (item) => {
 		const str = `https://wiki.app/c/${item.channel_id}/p/${item.id}`
 		navigator.clipboard.writeText(str)
-		toast.success('Link Copied...', { icon: <Check size={14} color='green' />, duration: 1000 })
+		toast.success('Link Copied...', { icon: <Check size={14} color='green' />, duration: 1000, style: { backgroundColor: 'rgba(0,0,0,0.8)', color: '#FFF' } })
 	}
 	const _wikielementNoteUpvote = (item) => {
 		dispatch(wikielementNoteUpvote({ channelId: item.channel_id, elementId: item.id })).then(()=>{
-			toast.success('Upvote Successfully...', { icon: <Check size={14} color='green' />, duration: 1000 })
+			toast.success('Upvote Successfully...', {
+				icon: <Check size={14} color='green' />,
+				duration: 1000,
+				style: { backgroundColor: 'rgba(0,0,0,0.8)', color: '#FFF' }
+			})
 		})
 	}
 	const _wikielementNoteDownvote = (item) => {
 		dispatch(wikielementNoteDownvote({ channelId: item.channel_id, elementId: item.id })).then(() => {
-			toast.success('Downvote Successfully...', { icon: <Check size={14} color='green' />, duration: 1000 })
+			toast.success('Downvote Successfully...', {
+				icon: <Check size={14} color='green' />,
+				duration: 1000,
+				style: { backgroundColor: 'rgba(0,0,0,0.8)', color: '#FFF' }
+			})
 		})
 	}
 	return (
 		<>
-			<Header />
 			<Progress key={'WikiElement'} />
 			<StyledRow style={{ justifyContent: 'space-between', alignItems: 'center', padding: 5 }}>
 				<StyledIcon onClick={() => history.goBack()}>
